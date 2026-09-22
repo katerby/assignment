@@ -3,6 +3,13 @@ import { expect, type Page } from '@playwright/test';
 export type EmployeeName = {
   firstName: string;
   lastName: string;
+  /**
+   * Replaces the id the application pre-fills. That generated value is a shared
+   * counter that only advances on save, so two runs that open the form at the
+   * same time read the same id and the second save is rejected with
+   * "Employee Id already exists".
+   */
+  employeeId: string;
 };
 
 export class EmployeeListPage {
@@ -11,21 +18,27 @@ export class EmployeeListPage {
   async open(): Promise<void> {
     await this.page.goto('/web/index.php/pim/viewEmployeeList');
     await expect(this.page.getByRole('heading', { name: 'PIM', exact: true })).toBeVisible();
+    // The heading and the Add button paint with the page shell, roughly 800ms
+    // before the employee list finishes loading. Waiting for the record count
+    // keeps a click from landing on a control the app has not wired up yet.
+    await expect(this.recordCount()).toBeVisible();
   }
 
   async openAddEmployee(): Promise<void> {
     await this.page.getByRole('button', { name: /Add$/ }).click();
-    await expect(this.page).toHaveURL(/\/web\/index\.php\/pim\/addEmployee$/);
     await expect(this.page.getByRole('heading', { name: 'Add Employee', exact: true })).toBeVisible();
+    await expect(this.page).toHaveURL(/\/web\/index\.php\/pim\/addEmployee$/);
   }
 
-  async createEmployee(employee: EmployeeName): Promise<{ employeeId: string; employeeNumber: string }> {
+  /** Returns the employee number, the identifier the application assigns on save. */
+  async createEmployee(employee: EmployeeName): Promise<string> {
     await this.page.getByPlaceholder('First Name', { exact: true }).fill(employee.firstName);
     await this.page.getByPlaceholder('Last Name', { exact: true }).fill(employee.lastName);
 
+    // Confirm the application generates an id, then take ownership of it.
     const employeeIdInput = this.inputForVisibleLabel('Employee Id');
     await expect(employeeIdInput).not.toHaveValue('');
-    const employeeId = await employeeIdInput.inputValue();
+    await employeeIdInput.fill(employee.employeeId);
 
     await this.page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(this.page).toHaveURL(/\/web\/index\.php\/pim\/viewPersonalDetails\/empNumber\/\d+$/);
@@ -36,38 +49,22 @@ export class EmployeeListPage {
       throw new Error('Employee number was not present in the Personal Details URL');
     }
 
-    return { employeeId, employeeNumber };
+    return employeeNumber;
   }
 
-  async expectEmployeeById(employeeId: string, employee: EmployeeName): Promise<void> {
+  async expectEmployeeById(employee: EmployeeName): Promise<void> {
     await this.open();
-    await this.employeeIdSearchInput().fill(employeeId);
+    await this.inputForVisibleLabel('Employee Id').fill(employee.employeeId);
     await this.page.getByRole('button', { name: 'Search', exact: true }).click();
 
-    const row = this.employeeRow(employeeId);
+    const row = this.employeeRow(employee.employeeId);
     await expect(row).toBeVisible();
     await expect(row).toContainText(employee.firstName);
     await expect(row).toContainText(employee.lastName);
   }
 
-  async deleteEmployeeById(employeeId: string): Promise<void> {
-    await this.open();
-    await this.employeeIdSearchInput().fill(employeeId);
-    await this.page.getByRole('button', { name: 'Search', exact: true }).click();
-
-    const row = this.employeeRow(employeeId);
-    if (!(await row.isVisible())) {
-      return;
-    }
-
-    await row.getByRole('checkbox').setChecked(true, { force: true });
-    await this.page.getByRole('button', { name: /Delete Selected$/ }).click();
-    await this.page.getByRole('button', { name: 'Yes, Delete', exact: true }).click();
-    await expect(this.page.getByText('Successfully Deleted', { exact: true })).toBeVisible();
-  }
-
-  private employeeIdSearchInput() {
-    return this.inputForVisibleLabel('Employee Id');
+  private recordCount() {
+    return this.page.getByText(/\(\d+\)\s+Records? Found/);
   }
 
   private employeeRow(employeeId: string) {

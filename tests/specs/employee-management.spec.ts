@@ -1,25 +1,22 @@
-import { test } from '@playwright/test';
-
 import { EmployeeListPage } from '../pages/employee-list.page';
+import { test } from '../support/fixtures';
 
-test('administrator can create an employee and find the record by generated ID', async ({ page }, testInfo) => {
+test('administrator can create an employee and find the record by its employee ID', async ({
+  page,
+  trackEmployee
+}, testInfo) => {
   const employeeList = new EmployeeListPage(page);
   const uniqueSuffix = `${Date.now()}${testInfo.workerIndex}`.slice(-10);
   const employee = {
     firstName: `Qa${uniqueSuffix}`,
-    lastName: 'Automation'
+    lastName: 'Automation',
+    employeeId: uniqueSuffix
   };
 
-  let employeeId: string | undefined;
+  await employeeList.open();
+  await employeeList.openAddEmployee();
 
-  try {
-    await employeeList.open();
-    await employeeList.openAddEmployee();
-    ({ employeeId } = await employeeList.createEmployee(employee));
-    await employeeList.expectEmployeeById(employeeId, employee);
-  } finally {
-    if (employeeId) {
-      await employeeList.deleteEmployeeById(employeeId);
-    }
-  }
+  trackEmployee(await employeeList.createEmployee(employee));
+
+  await employeeList.expectEmployeeById(employee);
 });

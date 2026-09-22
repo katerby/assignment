@@ -92,24 +92,24 @@ Five high-value cases will be selected across meaningful business risks, includi
 
 ### Test case 2
 
-**Title:** Create an employee and find the record by its generated ID
+**Title:** Create an employee and find the record by its employee ID
 
 **Objective:** Verify that an administrator can create a valid employee record and retrieve the same record from the Employee List.
 
 **Preconditions:** The administrator is authenticated and can access PIM. The test can remove the employee it creates.
 
-**Test data:** Unique first and last names of no more than 30 characters. Middle name is optional. The application-generated employee ID is captured during the test.
+**Test data:** Unique first and last names of no more than 30 characters. Middle name is optional. The employee ID is a unique value the test supplies, because the pre-filled one is a shared counter that only advances on save and therefore collides between concurrent runs.
 
 **Steps:**
 
 1. Open PIM and select **Add** from the Employee List.
 2. Enter unique values in the required first-name and last-name fields.
-3. Record the automatically generated employee ID.
+3. Confirm the application pre-fills a generated employee ID, then replace it with a unique test-owned value.
 4. Save the employee.
 5. Verify that the application opens the new employee's Personal Details page.
 6. Return to the Employee List and search for the captured employee ID.
 
-**Expected result:** The employee is saved, the Personal Details page represents the created employee, and an exact search by the generated ID returns the same employee record.
+**Expected result:** The employee is saved, the Personal Details page represents the created employee, and an exact search by that employee ID returns the same employee record.
 
 **Priority:** High.
 
@@ -140,11 +140,48 @@ Five high-value cases will be selected across meaningful business risks, includi
 
 ### Test case 4
 
-Pending selection.
+**Title:** Add a candidate against a vacancy and confirm the application stage
+
+**Objective:** Verify that a candidate created against an active vacancy enters the recruitment workflow with the correct vacancy and starting status.
+
+**Preconditions:** The administrator is authenticated and can access Recruitment. At least one active vacancy with a hiring manager exists. The test can remove the candidate it creates.
+
+**Test data:** Unique first and last names and a unique syntactically valid email address. The vacancy is read at run time rather than hardcoded, because demo vacancies are editable by anyone.
+
+**Steps:**
+
+1. Open the Recruitment Add Candidate page.
+2. Enter unique values in the required first-name, last-name, and email fields.
+3. Select an active vacancy.
+4. Save the candidate.
+
+**Expected result:** The saved candidate page shows the Application Stage panel with the selected vacancy, a status of `Application Initiated`, and both the Shortlist and Reject actions available.
+
+**Priority:** High.
+
+**Rationale:** Candidate creation alone does not put an applicant into the hiring workflow. Without a vacancy the application stage has no actions at all, so this case covers the step that makes a candidate actionable for a recruiter.
 
 ### Test case 5
 
-Pending selection.
+**Title:** Shortlist a candidate and confirm the status transition
+
+**Objective:** Verify that an administrator can advance a candidate from `Application Initiated` to `Shortlisted`.
+
+**Preconditions:** As test case 4. The vacancy must have a hiring manager assigned; the transition fails otherwise (see Findings outside the brief).
+
+**Test data:** As test case 4.
+
+**Steps:**
+
+1. Create a candidate against an active vacancy with a hiring manager.
+2. Select **Shortlist** from the application stage.
+3. Save the Shortlist Candidate form.
+
+**Expected result:** The application stage reports a status of `Shortlisted` for the same vacancy.
+
+**Priority:** Medium.
+
+**Rationale:** The status transition is the first state change in the recruitment pipeline and the point where the workflow becomes more than a data-entry form. It is also where the demo's defect surfaces, which makes it worth automating.
 
 ## Part 3 Test Automation
 
@@ -156,7 +193,7 @@ Pending final design decisions.
 
 ### Locator strategy
 
-The suite prioritizes user-visible roles, names, placeholders, and text. A live DOM audit found no `data-testid`, `data-test`, `data-cy`, `data-qa`, or `data-automation-id` attributes on the inspected login, PIM, and Recruitment pages. OrangeHRM exposes generated Vue `data-v-*` scope attributes, but these are build artifacts and are deliberately not used. OrangeHRM also does not associate every visual label with its input, so employee ID and candidate email fields are located from their visible label text and the textbox in the same input group. Employee results use semantic row and cell roles with the exact generated ID. Employee cleanup selects that exact row and uses the visible **Delete Selected** action; candidate cleanup uses the exact ID returned by the successful create response.
+The suite prioritizes user-visible roles, names, placeholders, and text. A live DOM audit found no `data-testid`, `data-test`, `data-cy`, `data-qa`, or `data-automation-id` attributes on the inspected login, PIM, and Recruitment pages. OrangeHRM exposes generated Vue `data-v-*` scope attributes, but these are build artifacts and are deliberately not used. OrangeHRM also does not associate every visual label with its input, so employee ID and candidate email fields are located from their visible label text and the textbox in the same input group. Employee results use semantic row and cell roles with the exact employee ID the test set. Cleanup does not go through the UI at all: a test-scoped fixture collects the identifiers the application itself returned - the employee `empNumber` from the Personal Details URL and the candidate ID from the create response - and deletes them by API in teardown, so cleanup cannot be affected by a search filter or hide the assertion that failed.
 
 ### Authentication strategy
 
@@ -177,4 +214,7 @@ Pending final retrospective.
 
 ### Findings outside the brief
 
-Pending exploratory findings.
+- **Shortlisting fails when the vacancy has no hiring manager.** Saving the Shortlist Candidate form sends `PUT /api/v2/recruitment/candidates/<id>/shortlist` with a body of `{"note":null}`. On a vacancy with a hiring manager assigned the request answers `200` and the status advances to `Shortlisted`. On a vacancy with none, the identical request answers `500 "Unexpected Error Occurred"`, the form stays open, and the status never leaves `Application Initiated`. Confirmed by running both cases back to back: vacancy 3 `Payroll Administrator` (hiring manager set) succeeded, vacancy 5 `Junior Account Assistant` (none) failed. A missing hiring manager is ordinary data, so the transition should either succeed or explain why it cannot.
+- **The failed shortlist is unhandled on the client.** The same request surfaces in the browser console as an uncaught `AxiosError` promise rejection rather than a handled failure, so the page shows only a generic error toast. This is a separate defect from the server error and should be filed separately.
+- **The application stage has no actions without a vacancy.** A candidate created with no vacancy shows `Vacancy: N/A` and neither Shortlist nor Reject. This appears intentional, but it is worth confirming that a recruiter is expected to edit the candidate to attach a vacancy afterwards.
+- **The PIM Employee List is interactive before it has finished loading.** The page heading and the **Add** button render roughly 800ms before the employee list request resolves. A click landing in that window is silently lost: no navigation happens and no error is shown. Automation has to wait for the record count rather than the heading; a user clicking quickly would see the same dead button.

@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+// Loads .env from the repository root so the overrides documented in
+// .env.example actually take effect. Values already set in the real
+// environment win, so CI can override without a file present.
+import 'dotenv/config';
 
 const authFile = 'playwright/.auth/user.json';
 

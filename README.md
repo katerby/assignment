@@ -6,7 +6,7 @@ The assignment response is organized into the required three parts in [docs/assi
 
 ## Project status
 
-The repository structure and Playwright configuration are initialized. The implemented cases verify valid authentication, employee creation and retrieval, and candidate creation. A setup project saves authenticated browser state for reuse by protected tests.
+All five designed test cases are automated: valid authentication, employee creation and retrieval, candidate creation, the candidate application stage, and the shortlist status transition. A setup project saves authenticated browser state for reuse by protected tests, and created records are removed in fixture teardown.
 
 ## Prerequisites
 
@@ -19,6 +19,11 @@ The repository structure and Playwright configuration are initialized. The imple
 npm install
 npx playwright install chromium
 ```
+
+The suite runs against the public demo with its published credentials and needs
+no configuration. To point it at different credentials, copy `.env.example` to
+`.env` and edit it; the file is loaded from the repository root and is
+Git-ignored. Variables already set in the environment take precedence.
 
 ## Run
 
