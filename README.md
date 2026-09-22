@@ -6,7 +6,7 @@ The assignment response is organized into the required three parts in [docs/assi
 
 ## Project status
 
-The repository structure and Playwright configuration are initialized. The implemented cases verify valid authentication and creation and retrieval of an employee. A setup project saves authenticated browser state for reuse by protected tests.
+The repository structure and Playwright configuration are initialized. The implemented cases verify valid authentication, employee creation and retrieval, and candidate creation. A setup project saves authenticated browser state for reuse by protected tests.
 
 ## Prerequisites
 

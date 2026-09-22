@@ -16,5 +16,12 @@ export class LoginPage {
   async expectDashboard(): Promise<void> {
     await expect(this.page).toHaveURL(/\/web\/index\.php\/dashboard\/index$/);
     await expect(this.page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible();
+    // The shared demo account name changes without notice; this may need updating if its display format changes.
+    const authenticatedUserName = this.page
+      .getByRole('banner')
+      .getByRole('paragraph')
+      .filter({ hasText: /\S+.*\suser$/i });
+    await expect(authenticatedUserName).toBeVisible();
+    await expect(authenticatedUserName).toHaveText(/\S/);
   }
 }

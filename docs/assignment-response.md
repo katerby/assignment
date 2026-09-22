@@ -14,6 +14,7 @@ This document records the exploratory testing, risk-based test design, and match
 - Assign Leave employee search, required fields, leave-balance feedback, contextual help, and insufficient-balance confirmation.
 - PIM employee-list navigation and the entry point for adding an employee.
 - Add Employee field requirements, length constraints, generated employee identifiers, save behavior, and Personal Details validation.
+- Recruitment candidate creation, required identity and email fields, and save behavior.
 
 ### Important observations
 
@@ -32,6 +33,8 @@ This document records the exploratory testing, risk-based test design, and match
 - On Add Employee, first and last name are required while middle name is optional. Each name field enforces a maximum length of 30 characters.
 - The application generates an employee ID automatically. After a successful save, it navigates to the new employee's Personal Details page, and the record can be found from the Employee List by its generated ID.
 - Personal Details allows additional demographic and identity data, including driver's license information, nationality, marital status, and date of birth.
+- Add Candidate requires the candidate's first name, last name, and email address. Middle name, vacancy, contact number, resume, keywords, application date, notes, and data-retention consent provide additional recruitment context.
+- The Recruitment pages expose no dedicated QA attributes. Candidate automation therefore uses visible form semantics and verifies the candidate-creation network response in addition to the resulting UI.
 
 ### Bugs and usability issues
 
@@ -81,7 +84,7 @@ Five high-value cases will be selected across meaningful business risks, includi
 3. Enter the valid password.
 4. Select **Login**.
 
-**Expected result:** The application navigates to the dashboard URL and displays the **Dashboard** heading.
+**Expected result:** The application navigates to the dashboard URL, displays the **Dashboard** heading, and shows a non-empty authenticated account name in the top-right banner.
 
 **Priority:** Critical.
 
@@ -114,7 +117,26 @@ Five high-value cases will be selected across meaningful business risks, includi
 
 ### Test case 3
 
-Pending selection.
+**Title:** Add a recruitment candidate with valid required information
+
+**Objective:** Verify that an authenticated administrator can create a candidate using the required identity and contact information.
+
+**Preconditions:** The administrator is authenticated and can access Recruitment. The test can remove the candidate it creates.
+
+**Test data:** Unique first and last names and a unique syntactically valid email address.
+
+**Steps:**
+
+1. Open the Recruitment Add Candidate page.
+2. Enter unique values in the required first-name and last-name fields.
+3. Enter a unique valid email address.
+4. Save the candidate.
+
+**Expected result:** The create request succeeds, the application opens the saved candidate page, and the candidate's full name is displayed.
+
+**Priority:** High.
+
+**Rationale:** Candidate creation is the entry point to the recruitment workflow. Failure would prevent recruiters from tracking applicants through vacancies, interviews, and hiring stages. Unique data and exact cleanup keep the case independent in the shared demo.
 
 ### Test case 4
 
@@ -134,7 +156,7 @@ Pending final design decisions.
 
 ### Locator strategy
 
-The suite prioritizes user-visible roles, names, placeholders, and text. A live DOM audit found no `data-testid`, `data-test`, `data-cy`, `data-qa`, or `data-automation-id` attributes on the inspected login, Employee List, and Add Employee pages. OrangeHRM exposes generated Vue `data-v-*` scope attributes, but these are build artifacts and are deliberately not used. OrangeHRM also does not associate every visual label with its input, so employee ID fields are located from the visible `Employee Id` text and the textbox in the same input group. Employee results use semantic row and cell roles with the exact generated ID. Cleanup selects that exact row and uses the visible **Delete Selected** action; it does not depend on icon classes or row position.
+The suite prioritizes user-visible roles, names, placeholders, and text. A live DOM audit found no `data-testid`, `data-test`, `data-cy`, `data-qa`, or `data-automation-id` attributes on the inspected login, PIM, and Recruitment pages. OrangeHRM exposes generated Vue `data-v-*` scope attributes, but these are build artifacts and are deliberately not used. OrangeHRM also does not associate every visual label with its input, so employee ID and candidate email fields are located from their visible label text and the textbox in the same input group. Employee results use semantic row and cell roles with the exact generated ID. Employee cleanup selects that exact row and uses the visible **Delete Selected** action; candidate cleanup uses the exact ID returned by the successful create response.
 
 ### Authentication strategy
 
