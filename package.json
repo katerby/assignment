@@ -1,0 +1,23 @@
+{
+  "name": "triparc-qa-analyst-assignment",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Exploratory testing, test design, and Playwright automation for the OrangeHRM demo application.",
+  "scripts": {
+    "test": "playwright test",
+    "test:auth": "playwright test --project=authentication",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.0.0",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
