@@ -76,6 +76,4 @@ The final README will also explain:
 - project structure and why it was chosen;
 - locator strategy;
 - deliberate automation exclusions;
-- known limitations and assumptions;
-- what would be done with another three hours; and
-- findings outside the brief.
+- known limitations and assumptions.

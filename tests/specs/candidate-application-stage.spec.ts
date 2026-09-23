@@ -10,7 +10,7 @@ type Vacancy = { id: number; name: string };
  * run time instead of hardcoding a name that may be renamed.
  *
  * A vacancy with no hiring manager cannot be shortlisted (the transition answers
- * 500 - see "Findings outside the brief" in docs/assignment-response.md), and the
+ * 500 - see "Bugs and usability issues" in docs/assignment-response.md), and the
  * list payload omits that field, so each vacancy is read individually.
  */
 async function findVacancyWithHiringManager(request: APIRequestContext): Promise<string> {

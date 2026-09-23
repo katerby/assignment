@@ -171,7 +171,7 @@ Five high-value cases will be selected across meaningful business risks, includi
 
 **Objective:** Verify that an administrator can advance a candidate from `Application Initiated` to `Shortlisted`.
 
-**Preconditions:** As test case 4. The vacancy must have a hiring manager assigned; the transition fails otherwise (see Findings outside the brief).
+**Preconditions:** As test case 4. The vacancy must have a hiring manager assigned; the transition fails otherwise (see Bugs and usability issues).
 
 **Test data:** As test case 4.
 
@@ -211,14 +211,3 @@ The valid-login test starts without stored authentication and performs the login
 
 - The OrangeHRM demo is public and shared, so data can change or reset between runs.
 - Environmental slowness or brief unavailability will be recorded rather than hidden with arbitrary waits.
-
-### With another three hours
-
-Pending final retrospective.
-
-### Findings outside the brief
-
-The two shortlist defects found while automating test case 5 are recorded under Bugs and usability issues in Part 1. The remaining observations are behaviours that affect how the suite had to be written rather than confirmed defects.
-
-- **The application stage has no actions without a vacancy.** A candidate created with no vacancy shows `Vacancy: N/A` and neither Shortlist nor Reject. This appears intentional, but it is worth confirming that a recruiter is expected to edit the candidate to attach a vacancy afterwards.
-- **The PIM Employee List is interactive before it has finished loading.** The page heading and the **Add** button render roughly 800ms before the employee list request resolves. A click landing in that window is silently lost: no navigation happens and no error is shown. Automation has to wait for the record count rather than the heading; a user clicking quickly would see the same dead button.
