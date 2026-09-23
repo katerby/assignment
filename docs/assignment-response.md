@@ -35,6 +35,7 @@ This document records the exploratory testing, risk-based test design, and match
 - Personal Details allows additional demographic and identity data, including driver's license information, nationality, marital status, and date of birth.
 - Add Candidate requires the candidate's first name, last name, and email address. Middle name, vacancy, contact number, resume, keywords, application date, notes, and data-retention consent provide additional recruitment context.
 - Length limits are applied by validation rather than by the inputs themselves. No field carries a `maxlength` attribute across Add Employee, Add Candidate, Contact Details, Personal Details or Add User, so an over-long value can be typed and is rejected on submit with an inline message; name fields cap at 30 characters and phone fields at 25. Long free-text values are abbreviated for display in list views: the Assign Claim list renders a description followed by `...Show More` rather than the stored value, so a table cell is not a reliable source for an exact-match assertion even when it still contains the full text.
+- A cross-browser and responsiveness smoke was run across the Chromium, Firefox and WebKit (Safari) engines at desktop, tablet and mobile widths (1280, 768 and 375 pixels). Login rendered and reached the dashboard in every combination with no JavaScript errors, and the side navigation collapsed below the desktop width consistently across all three engines, so the breakpoint is not browser-specific. This was a lightweight check of login and the dashboard rather than a per-page visual pass, and WebKit stands in for Safari rather than Safari on macOS itself.
 - The Recruitment pages expose no dedicated QA attributes. Candidate automation therefore uses visible form semantics and verifies the candidate-creation network response in addition to the resulting UI.
 
 ### Bugs and usability issues
@@ -211,3 +212,4 @@ The valid-login test starts without stored authentication and performs the login
 
 - The OrangeHRM demo is public and shared, so data can change or reset between runs.
 - Environmental slowness or brief unavailability will be recorded rather than hidden with arbitrary waits.
+- The automated suite runs on Chromium only; the cross-browser and responsiveness check above was a separate manual smoke. Extending the Playwright projects to Firefox and WebKit would fold it into CI.
