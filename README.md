@@ -147,9 +147,6 @@ are the defaults and can be overridden through `ORANGEHRM_USERNAME` and
   acceptance and the shortlist 500 are documented as findings, not encoded as if
   they were correct. The shortlist case is automated on the path that works and
   the defect is recorded in the response.
-- **Cross-browser and responsiveness, and load/performance.** These were covered
-  as a manual check rather than in the committed suite; the reasoning and how to
-  fold them into CI are in the assignment response.
 
 Cleanup deserves a note because it shaped the specs: every test deletes the
 records it creates, by API, in a fixture teardown rather than in the test body.
