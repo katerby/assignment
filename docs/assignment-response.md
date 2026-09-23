@@ -58,6 +58,9 @@ This document records the exploratory testing, risk-based test design, and match
 - Dashboard chart presence can be checked through the UI, but validating the accuracy of the displayed statistics would require a trusted data source or API comparison.
 - Adding an employee creates persistent data in the shared demo. Further testing should cover required fields, unique employee identifiers, cancellation, successful save, searchability of the saved employee, and cleanup. Automation will need uniquely generated test data and a reliable cleanup strategy.
 - Date-of-birth validation is a data-integrity risk. Further checks should cover today's date, a dynamically generated future date, invalid calendar dates, leap years, and reasonable lower age boundaries. A dynamic future date is required so an automated check never becomes valid merely because time has passed.
+- Role and permission coverage is the largest untested area. The current work runs entirely as an administrator, so it does not verify that users with limited permissions are prevented from viewing or editing sensitive data. Further testing should confirm access control per role at both the UI and the API, including that a restricted user cannot reach protected pages or succeed on a direct API call that the UI does not offer them.
+- Security testing beyond the input-handling checks already done would be valuable: authorization on every endpoint, session and authentication handling, and input validation across the wider application rather than the few fields sampled here.
+- Performance testing is out of scope for this pass but worth noting: page and API response times under load, and behaviour of the larger list views as data grows.
 
 ## Part 2 Test Case Design
 
