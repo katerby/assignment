@@ -49,15 +49,6 @@ This document records the exploratory testing, risk-based test design, and match
 
 ### Risks and further testing
 
-- Authentication is a critical dependency: an outage or regression prevents access to all protected HR workflows.
-- Password-reset delivery cannot be validated reliably without access to a controlled user and mailbox. Automation should avoid sending reset requests for shared or unknown accounts.
-- Quick Launch links provide broad workflow access, so incorrect destinations would affect several common user journeys.
-- Leave balances and employee records in the public demo are volatile. Tests must not assume that a particular employee, balance, or leave request will remain unchanged.
-- Assigning leave changes shared HR data. An automated test should not confirm an assignment unless it owns suitable test data and can clean up safely.
-- The insufficient-balance override requires product clarification: determine which roles may override a balance, whether a negative balance is expected, and where the resulting request must appear.
-- Dashboard chart presence can be checked through the UI, but validating the accuracy of the displayed statistics would require a trusted data source or API comparison.
-- Adding an employee creates persistent data in the shared demo. Further testing should cover required fields, unique employee identifiers, cancellation, successful save, searchability of the saved employee, and cleanup. Automation will need uniquely generated test data and a reliable cleanup strategy.
-- Date-of-birth validation is a data-integrity risk. Further checks should cover today's date, a dynamically generated future date, invalid calendar dates, leap years, and reasonable lower age boundaries. A dynamic future date is required so an automated check never becomes valid merely because time has passed.
 - Role and permission coverage is the largest untested area. The current work runs entirely as an administrator, so it does not verify that users with limited permissions are prevented from viewing or editing sensitive data. Further testing should confirm access control per role at both the UI and the API, including that a restricted user cannot reach protected pages or succeed on a direct API call that the UI does not offer them.
 - Security testing beyond the input-handling checks already done would be valuable: authorization on every endpoint, session and authentication handling, and input validation across the wider application rather than the few fields sampled here.
 - Performance testing is out of scope for this pass but worth noting: page and API response times under load, and behaviour of the larger list views as data grows.
